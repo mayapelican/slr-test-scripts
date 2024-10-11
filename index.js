@@ -17,11 +17,34 @@ const client = new Client(config);
 // Path to the SQL file
 const sqlFilePath = path.join(__dirname, 'backup.sql'); // Replace with your actual SQL file name
 
+async function connectClient() {
+  try {
+    if (!client._connected) {
+      await client.connect();
+      console.log('Connected to PostgreSQL server.');
+      client._connected = true; // Mark client as connected
+    }
+  } catch (err) {
+    console.error('Error connecting to PostgreSQL:', err);
+  }
+}
+
+async function disconnectClient() {
+  try {
+    if (client._connected) {
+      await client.end();
+      console.log('Disconnected from PostgreSQL server.');
+      client._connected = false; // Mark client as disconnected
+    }
+  } catch (err) {
+    console.error('Error disconnecting from PostgreSQL:', err);
+  }
+}
+
 async function listDatabases() {
   try {
-    // Connect to PostgreSQL
-    await client.connect();
-    console.log('Connected to PostgreSQL server.');
+    // Ensure the client is connected
+    await connectClient();
 
     // List databases
     const res = await client.query('SELECT datname FROM pg_database WHERE datistemplate = false;');
@@ -30,42 +53,45 @@ async function listDatabases() {
       console.log(row.datname);
     });
 
-    // Disconnect from PostgreSQL
-    await client.end();
-    console.log('Disconnected from PostgreSQL server.');
   } catch (err) {
-    console.error('Error connecting to PostgreSQL:', err);
+    console.error('Error listing databases:', err);
   }
 }
 
 async function createSchemaAndRestoreSQL() {
-    try {
-      // Connect to PostgreSQL
-      await client.connect();
-      console.log('Connected to PostgreSQL server.');
-  
-      // Create a new schema (change 'your_schema' to the desired schema name)
-      const createSchemaQuery = `CREATE SCHEMA IF NOT EXISTS public;`;
-      await client.query(createSchemaQuery);
-      console.log('Schema created successfully.');
-  
-      // Read the SQL file content
-      const sqlContent = fs.readFileSync(sqlFilePath, 'utf-8');
-  
-      // Execute the SQL file content in the public schema
-      await client.query(sqlContent);
-      console.log('SQL file executed successfully.');
-  
-      // Disconnect from PostgreSQL
-      await client.end();
-      console.log('Disconnected from PostgreSQL server.');
-    } catch (err) {
-      console.error('Error:', err);
-    }
+  try {
+    // Ensure the client is connected
+    await connectClient();
+
+    // Create a new schema (change 'your_schema' to the desired schema name)
+    const createSchemaQuery = `CREATE SCHEMA IF NOT EXISTS public;`;
+    await client.query(createSchemaQuery);
+    console.log('Schema created successfully.');
+
+    // Read the SQL file content
+    const sqlContent = fs.readFileSync(sqlFilePath, 'utf-8');
+
+    // Execute the SQL file content in the public schema
+    await client.query(sqlContent);
+    console.log('SQL file executed successfully.');
+
+  } catch (err) {
+    console.error('Error creating schema and restoring SQL file:', err);
   }
+}
 
-// Call the function to list databases
-listDatabases();
+async function main() {
+  try {
+    // Perform database listing
+    await listDatabases();
 
-// Call the function to create schema and restore SQL file
-createSchemaAndRestoreSQL();
+    // Perform schema creation and SQL file restoration
+    await createSchemaAndRestoreSQL();
+  } finally {
+    // Ensure the client is disconnected
+    await disconnectClient();
+  }
+}
+
+// Call the main function
+main();
