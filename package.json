@@ -1,0 +1,14 @@
+{
+  "name": "slr-test-scripts",
+  "version": "1.0.2",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  }
+}
