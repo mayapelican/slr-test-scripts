@@ -7,13 +7,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // PostgreSQL connection configuration
+// const config = {
+//     user: 'postgres',
+//     host: 'edb-poc-rw', // e.g., 'localhost'
+//     password: 'uN3i1Hh0bYbCc4TyVAacBhmSzgqtzqxmOVjAn0QIChsJrSmu9PY2fw2q8EKKLpZ9',
+//     database: 'app',
+//     port: 5432, // Default PostgreSQL port
+// };
+
 const config = {
-    user: 'postgres',
+    user: 'bneAjWHXTty8CUpfrQJk95qRd',
     host: 'edb-poc-rw', // e.g., 'localhost'
-    password: 'uN3i1Hh0bYbCc4TyVAacBhmSzgqtzqxmOVjAn0QIChsJrSmu9PY2fw2q8EKKLpZ9',
+    password: 'gV4yeAkxbtZ3M26mXnaBq75TYPsLjUhRKrcpGuQ8EvNfSz9WdJ',
     database: 'app',
     port: 5432, // Default PostgreSQL port
 };
+
 
 // Create a connection pool
 const pool = new Pool(config);
