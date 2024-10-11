@@ -58,6 +58,29 @@ async function listDatabases() {
   }
 }
 
+async function listTables() {
+    try {
+      // Ensure the client is connected
+      await connectClient();
+  
+      // Query to list tables in the 'public' schema
+      const res = await client.query(`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_type = 'BASE TABLE';
+      `);
+      
+      console.log('Tables in the public schema:');
+      res.rows.forEach(row => {
+        console.log(row.table_name);
+      });
+  
+    } catch (err) {
+      console.error('Error listing tables:', err);
+    }
+  }
+
 async function createSchemaAndRestoreSQL() {
   try {
     // Ensure the client is connected
@@ -86,7 +109,9 @@ async function main() {
     await listDatabases();
 
     // Perform schema creation and SQL file restoration
-    await createSchemaAndRestoreSQL();
+    // await createSchemaAndRestoreSQL();
+
+    await listTables();
   } finally {
     // Ensure the client is disconnected
     await disconnectClient();
