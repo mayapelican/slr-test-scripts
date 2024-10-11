@@ -1,6 +1,10 @@
+const express = require('express');
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // PostgreSQL connection configuration
 const config = {
@@ -17,106 +21,88 @@ const client = new Client(config);
 // Path to the SQL file
 const sqlFilePath = path.join(__dirname, 'backup.sql'); // Replace with your actual SQL file name
 
+// Connect to PostgreSQL
 async function connectClient() {
-  try {
-    if (!client._connected) {
-      await client.connect();
-      console.log('Connected to PostgreSQL server.');
-      client._connected = true; // Mark client as connected
-    }
-  } catch (err) {
-    console.error('Error connecting to PostgreSQL:', err);
+  if (!client._connected) {
+    await client.connect();
+    console.log('Connected to PostgreSQL server.');
+    client._connected = true;
   }
 }
 
+// Disconnect from PostgreSQL
 async function disconnectClient() {
-  try {
-    if (client._connected) {
-      await client.end();
-      console.log('Disconnected from PostgreSQL server.');
-      client._connected = false; // Mark client as disconnected
-    }
-  } catch (err) {
-    console.error('Error disconnecting from PostgreSQL:', err);
+  if (client._connected) {
+    await client.end();
+    console.log('Disconnected from PostgreSQL server.');
+    client._connected = false;
   }
 }
 
-async function listDatabases() {
+// Route to list all tables in the public schema
+app.get('/list-tables', async (req, res) => {
   try {
-    // Ensure the client is connected
     await connectClient();
 
-    // List databases
-    const res = await client.query('SELECT datname FROM pg_database WHERE datistemplate = false;');
-    console.log('Databases:');
-    res.rows.forEach(row => {
-      console.log(row.datname);
-    });
+    // Query to list tables in the 'public' schema
+    const result = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE';
+    `);
+    
+    const tables = result.rows.map(row => row.table_name);
+    res.json({ tables });
 
   } catch (err) {
-    console.error('Error listing databases:', err);
+    console.error('Error listing tables:', err);
+    res.status(500).json({ error: 'Failed to list tables' });
+  } finally {
+    await disconnectClient();
   }
-}
+});
 
-async function listTables() {
-    try {
-      // Ensure the client is connected
-      await connectClient();
-  
-      // Query to list tables in the 'public' schema
-      const res = await client.query(`
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_type = 'BASE TABLE';
-      `);
-      
-      console.log('Tables in the public schema:');
-      res.rows.forEach(row => {
-        console.log(row.table_name);
-      });
-  
-    } catch (err) {
-      console.error('Error listing tables:', err);
-    }
-  }
-
-async function createSchemaAndRestoreSQL() {
+// Route to restore schema and run SQL backup
+app.post('/restore-schema', async (req, res) => {
   try {
-    // Ensure the client is connected
     await connectClient();
 
-    // Create a new schema (change 'your_schema' to the desired schema name)
+    // Create the schema if not exists
     const createSchemaQuery = `CREATE SCHEMA IF NOT EXISTS public;`;
     await client.query(createSchemaQuery);
     console.log('Schema created successfully.');
 
-    // Read the SQL file content
-    const sqlContent = fs.readFileSync(sqlFilePath, 'utf-8');
-
-    // Execute the SQL file content in the public schema
-    await client.query(sqlContent);
-    console.log('SQL file executed successfully.');
-
+    res.json({ message: 'Schema restored successfully' });
   } catch (err) {
-    console.error('Error creating schema and restoring SQL file:', err);
-  }
-}
-
-async function main() {
-  try {
-    // Perform database listing
-    await listDatabases();
-
-    // Perform schema creation and SQL file restoration
-    // await createSchemaAndRestoreSQL();
-
-    await listTables();
+    console.error('Error restoring schema:', err);
+    res.status(500).json({ error: 'Failed to restore schema' });
   } finally {
-    // Ensure the client is disconnected
     await disconnectClient();
   }
-}
+});
 
-// Call the main function
-main();
+// Route to restore schema and run SQL backup
+app.post('/restore-data', async (req, res) => {
+    try {
+      await connectClient();
+      // Read the SQL file content
+      const sqlContent = fs.readFileSync(sqlFilePath, 'utf-8');
+  
+      // Execute the SQL file content
+      await client.query(sqlContent);
+      console.log('SQL file executed successfully.');
+  
+      res.json({ message: 'Data restored and SQL executed successfully' });
+    } catch (err) {
+      console.error('Error restoring schema:', err);
+      res.status(500).json({ error: 'Failed to restore schema' });
+    } finally {
+      await disconnectClient();
+    }
+  });
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
