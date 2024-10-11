@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 const config = {
     user: 'bneAjWHXTty8CUpfrQJk95qRd',
     host: 'edb-demo-rw', // e.g., 'localhost'
-    password: 'gV4yeAkxbtZ3M26mXnaBq75TYPsLjUhRKrcpGuQ8EvNfSz9WdJ',
+    password: 'gV4yeAkxbtZ1M26mXnaBq75TYPsLjUhRKrcpGuQ8EvNfSz9WdJ',
     database: 'app',
     port: 5432, // Default PostgreSQL port
 };
