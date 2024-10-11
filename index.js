@@ -21,6 +21,32 @@ const pool = new Pool(config);
 // Path to the SQL file
 const sqlFilePath = path.join(__dirname, 'backup.sql'); // Replace with your actual SQL file name
 
+// API endpoint to run custom SQL commands
+app.post('/run-sql', async (req, res) => {
+    const { sql } = req.body;
+
+    // Check if SQL is provided
+    if (!sql) {
+        return res.status(400).json({ error: 'SQL command is required.' });
+    }
+
+    try {
+        await connectClient();
+
+        // Execute the SQL command
+        const result = await client.query(sql);
+
+        // Return the result of the query
+        res.json({ rows: result.rows, fields: result.fields });
+
+    } catch (err) {
+        console.error('Error executing SQL:', err);
+        res.status(500).json({ error: 'Failed to execute SQL', details: err.message });
+    } finally {
+        await disconnectClient();
+    }
+});
+
 // Route to list all databases
 app.get('/list-databases', async (req, res) => {
     try {
