@@ -23,6 +23,7 @@ const sqlFilePath = path.join(__dirname, 'backup.sql'); // Replace with your act
 
 // API endpoint to run custom SQL commands
 app.post('/run-sql', async (req, res) => {
+    console.log(req.body)
     const { sql } = req.body;
 
     // Check if SQL is provided
