@@ -1,0 +1,11 @@
+App user
+Username: Rh73D9EbNxm2urZt86sqYGSKJ
+PAssword: ntzPEkGcYW8T4bFv7mZaHsfL3JqV6gxQKje5MARDrXS9uUCpBN
+
+Superuser
+Username: bneAjWHXTty8CUpfrQJk95qRd
+PAssword: gV4yeAkxbtZ3M26mXnaBq75TYPsLjUhRKrcpGuQ8EvNfSz9WdJ
+
+Backup Credentials
+ACCESS_KEY_ID: Sn9uDVcFPXjxU3bysAhkmRadr
+ACCESS_SECRET_KEY: rvM7CGdwLDmf9p84uHe2R3SgKNhcxbasUQWVJZqBYn5yjtz6AP

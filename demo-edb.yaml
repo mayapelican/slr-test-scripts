@@ -1,0 +1,28 @@
+# Secret for app user credentials
+apiVersion: v1
+data:
+  password: aEo3I2RLcCFROCogM3NIYz9sOWJFdEZnV1p5TjR2QHVQ
+  username: M30xNCJuWzQ2aW4/VXA4dzAhcA==
+kind: Secret
+metadata:
+  name: edb-demo-app-user
+type: kubernetes.io/basic-auth
+---
+# Secret for superuser credentials
+apiVersion: v1
+data:
+  password: MXc7P3ZJN056LG9lLzZgX25fLCJqRG8rakovTiR5X0g6OTBjME9eMyRJdSsrMCNvOU4=
+  username: aWFbK0xjNDh7NE98QkJfTHloOg==
+kind: Secret
+metadata:
+  name: edb-demo-superuser
+type: kubernetes.io/basic-auth
+---
+# Secret for backup credentials
+apiVersion: v1
+kind: Secret
+metadata:
+  name: edb-demo-backup-creds
+data:
+  ACCESS_KEY_ID: OTQyLzI0a0JyM0lwb18rSUZYNSc=
+  ACCESS_SECRET_KEY: eS0+ZkVGLkpceEVIXE0jO1NbMCDigJhtb3R6UHlRYSFCRUpeez4sVCFdMShpNTYjLykqNw==
